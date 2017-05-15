@@ -5,7 +5,7 @@ total_overs = 20
 teams = ['DD','GL','KKR','RPS','KXIP','RCB','SRH','MI']
 
 
-def count_balls (overs):
+def count_balls(overs):
     no_of_overs = int(overs)
     b = overs - no_of_overs
     balls = round((b*10),0)
@@ -14,16 +14,21 @@ def count_balls (overs):
 
 
 def pre_alterations(matches):
-
     matches['1st_balls'] = matches['1st_overs']
     matches['2nd_balls'] = matches['2nd_overs']
+    matches['looser'] = matches ['bat_first']
     for i, record in matches.iterrows():
         matches.loc[i, '1st_balls'] = total_overs * 6
         if record['ball_first'] == record['winner']:
             matches.loc[i, '2nd_balls'] = count_balls(record['2nd_overs'])
         else:
             matches.loc[i, '2nd_balls'] = total_overs * 6
-
+        if record['bat_first'] == record['winner']:
+            matches.loc[i, 'looser'] = record['ball_first']
+        elif record['ball_first'] == record['winner']:
+            matches.loc[i, 'looser'] = record['bat_first']
+        else:
+            matches.loc[i, 'looser'] = 'NA'
     return matches
 
 
@@ -60,7 +65,6 @@ def get_points_table(matches):
     points_table.sort_values(by=['points','nrr'], ascending=False, axis=0, inplace=True)
     points_table.reset_index(inplace=True)
     points_table['index'] = points_table.index
-    points_table.index = points_table['team']
     return points_table
 
 
@@ -72,12 +76,43 @@ def get_combinations(matches_list):
             all_combinations.append(i)
     return list(all_combinations)
 
-def run():
-    # match_file_name = "ipl17.xlsx"
-    # matches = pd.read_excel(match_file_name, sheet_name="Compact", index_col="match")
-    # matches = pre_alterations(matches)
-    # print(get_points_table(matches))
-    print (get_combinations(['1',2,['a','b','b']]))
 
+def get_matches_list(team,matches):
+    matches_list = []
+    for i, record in matches.iterrows():
+        if team == record['looser']:
+            matches_list.append(record['match'])
+    return matches_list
+
+
+def is_success (team,matches):
+    points_table = get_points_table(matches)
+    flag = False
+    rank = int(points_table[points_table.team == team]['index'])
+    if rank <= 3:
+        flag = True
+    elif rank > 3:
+        flag =False
+    return flag
+
+
+def test_combinations(all_combinations,team,matches):
+    print(all_combinations)
+    combination_record = dict(combination=(), points=0, runs=0, success=False, equalize=False)
+    points_table = pd.DataFrame(data=None, columns=list(combination_record))
+    for i in all_combinations:
+        combination_record = dict(combination=(), points=0, runs=0, success=False, equalize=False)
+        for j in i:
+            matches.loc[j, 'Qty']
+    return True
+
+
+def run():
+    match_file_name = "ipl17.xlsx"
+    matches = pd.read_excel(match_file_name, sheet_name="Compact")
+    matches = pre_alterations(matches)
+    team = 'MI'
+    # all_combinations = get_combinations(get_matches_list(team,matches))
+    # test_combinations(all_combinations,team,matches)
 if __name__ == '__main__':
     run()
