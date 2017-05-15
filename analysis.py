@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from itertools import combinations
 total_overs = 20
 teams = ['DD','GL','KKR','RPS','KXIP','RCB','SRH','MI']
 
@@ -63,11 +64,20 @@ def get_points_table(matches):
     return points_table
 
 
+def get_combinations(matches_list):
+    all_combinations = []
+    for i in range(len(matches_list)):
+        comb = combinations(matches_list, i + 1)
+        for i in list(comb):
+            all_combinations.append(i)
+    return list(all_combinations)
+
 def run():
-    match_file_name = "ipl17.xlsx"
-    matches = pd.read_excel(match_file_name, sheet_name="Compact", index_col="match")
-    matches = pre_alterations(matches)
-    print(get_points_table(matches))
+    # match_file_name = "ipl17.xlsx"
+    # matches = pd.read_excel(match_file_name, sheet_name="Compact", index_col="match")
+    # matches = pre_alterations(matches)
+    # print(get_points_table(matches))
+    print (get_combinations(['1',2,['a','b','b']]))
 
 if __name__ == '__main__':
     run()
